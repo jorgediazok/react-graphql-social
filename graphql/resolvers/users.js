@@ -1,9 +1,10 @@
 // @ts-nocheck
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { userInputError, UserInputError } = require('apollo-server');
+const { UserInputError } = require('apollo-server');
 require('dotenv').config();
 
+const { validateRegisterInput } = require('../../util/validators');
 const User = require('../../models/User');
 
 module.exports = {
@@ -15,8 +16,18 @@ module.exports = {
       context,
       info
     ) {
-      //make sure user doesnt already exist
+      //Valudate user data
+      const { valid, errors } = validateRegisterInput(
+        username,
+        email,
+        password,
+        confirmPassword
+      );
+      if (!valid) {
+        throw new UserInputError('Errors', { errors });
+      }
 
+      //make sure user doesnt already exist
       const user = await User.findOne({
         username,
       });
@@ -24,6 +35,18 @@ module.exports = {
         throw new UserInputError('Username is taken', {
           errors: {
             username: 'This username is taken',
+          },
+        });
+      }
+
+      const userEmail = await User.findOne({
+        email,
+      });
+
+      if (userEmail) {
+        throw new UserInputError('Email is already taken', {
+          errors: {
+            username: 'This email is taken',
           },
         });
       }
@@ -54,6 +77,5 @@ module.exports = {
         token,
       };
     },
-    //validate user data
   },
 };
