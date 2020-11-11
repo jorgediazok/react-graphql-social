@@ -1,6 +1,7 @@
 const { ApolloServer } = require('apollo-server');
 const gql = require('graphql-tag');
 
+// @ts-ignore
 const typeDefs = gql`
   type Query {
     sayHi: String!
@@ -18,6 +19,6 @@ const server = new ApolloServer({
   resolvers,
 });
 
-server.listen({ PORT: 5000 }).then((res) => {
+server.listen({ port: 5000 }).then((res) => {
   console.log(`Server running at ${res.url}`);
 });
